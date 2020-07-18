@@ -14,65 +14,69 @@ class RatioCalc extends Component {
         }
         this.updateInput = this.updateInput.bind( this );
     }
+    gcd (a, b) {
+        return (b == 0) ? a : this.gcd (b, a%b);
+    }
     updateInput ( propertyName, event ) {
+
       const inputs = this.state.inputs;
-      inputs[propertyName] = event.target.value;
+      inputs[propertyName] = event.target.value.replace(/\D/,'');
 
       if ( inputs.a && inputs.b ) {
 
-          this.setState({ratio: inputs.a / inputs.b});
+          const gcd = this.gcd( inputs.a , inputs.b ),
+            w = inputs.a / gcd,
+            h = inputs.b / gcd,
+            ratio = w + ":" + h;
+            // console.log('-- gcd -- ' , gcd, ' ratio ', ratio, ' event.target ', event.target.getAttribute('id') );
 
-          if ( inputs.c || inputs.d ) {
-              console.log('-- play ball -- ' );
+          this.setState({ ratio: ratio });
+
+          let targetInput = event.target.getAttribute('id');
+
+          if ( targetInput == 'c' ) {
+              let d = ( inputs.b / inputs.a ) * inputs.c;
+              inputs.d = d.toFixed(1);
+              console.log('changing d ', d, ' gcd ', gcd );
+          }
+          else if ( targetInput == 'd' )  {
+              let c = ( inputs.a / inputs.b ) * inputs.d;
+              inputs.c = c.toFixed(1);
+              console.log('changing c ');
+          }
+          else {
+              inputs.c = inputs.d = '';
           }
 
       }
 
       this.setState({ inputs: inputs });
     }
-    reduceRatio (numerator, denominator) {
-                // var gcd, temp, divisor;
-                //         // from: http://pages.pacificcoast.net/~cazelais/euclid.html
-                // gcd = function (a, b) {
-                //     if (b === 0) return a;
-                //     return gcd(b, a % b);
-                // }
-                //         // take care of some simple cases
-                // if (!isInteger(numerator) || !isInteger(denominator)) return '? : ?';
-                // if (numerator === denominator) return '1 : 1';
-                //         // make sure numerator is always the larger number
-                // if (+numerator < +denominator) {
-                //     temp        = numerator;
-                //     numerator   = denominator;
-                //     denominator = temp;
-                // }
-                //         divisor = gcd(+numerator, +denominator);
-                //         return 'undefined' === typeof temp ? (numerator / divisor) + ' : ' + (denominator / divisor) : (denominator / divisor) + ' : ' + (numerator / divisor);
-    }
     render () {
         return(
           <div className="ratioCalc">
-              <h2>Ratio calculator</h2>
+              <h2>React ratio calculator</h2>
+              <aside><a href="https://github.com/rpmanley/ratioUtiltiy-">Github</a></aside>
               <table>
                   <thead>
                       <tr>
-                          <td><label htmlFor="A">A</label></td>
-                          <td><label htmlFor="B">B</label></td>
-                          <td><label htmlFor="C">C</label></td>
-                          <td><label htmlFor="D">D</label></td>
+                          <td><label htmlFor="a">A</label></td>
+                          <td><label htmlFor="b">B</label></td>
+                          <td><label htmlFor="c">C</label></td>
+                          <td><label htmlFor="d">D</label></td>
                       </tr>
                   </thead>
                   <tbody>
                       <tr>
-                          <td><input id="A" value={this.state.inputs.a} onChange={(e) => this.updateInput('a', e)} type="number" /></td>
-                          <td><input id="B" value={this.state.inputs.b} onChange={(e) => this.updateInput('b', e)} type="number" /></td>
-                          <td><input id="C" value={this.state.inputs.c} onChange={(e) => this.updateInput('c', e)} type="number" /></td>
-                          <td><input id="D" value={this.state.inputs.d} onChange={(e) => this.updateInput('d', e)} type="number" /></td>
+                          <td><input id="a" value={this.state.inputs.a} onChange={(e) => this.updateInput('a', e)} type="number" /></td>
+                          <td><input id="b" value={this.state.inputs.b} onChange={(e) => this.updateInput('b', e)} type="number" /></td>
+                          <td><input id="c" value={this.state.inputs.c} onChange={(e) => this.updateInput('c', e)} type="number" /></td>
+                          <td><input id="d" value={this.state.inputs.d} onChange={(e) => this.updateInput('d', e)} type="number" /></td>
                       </tr>
                   </tbody>
               </table>
               <label htmlFor="ratio">Ratio</label>
-              <input type="number" readOnly={true} id="ratio" value={this.state.ratio} />
+              <input readOnly={true} id="ratio" value={this.state.ratio} />
           </div>
         )
     }
